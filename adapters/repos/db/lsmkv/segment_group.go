@@ -146,11 +146,47 @@ func (ig *SegmentGroup) add(path string) error {
 	return nil
 }
 
+func (ig *SegmentGroup) get2(key []byte, k string) ([]byte, error) {
+	ig.maintenanceLock.RLock()
+	defer ig.maintenanceLock.RUnlock()
+
+	return ig.getWithUpperSegmentBoundary2(key, len(ig.segments)-1, k)
+}
+
 func (ig *SegmentGroup) get(key []byte) ([]byte, error) {
 	ig.maintenanceLock.RLock()
 	defer ig.maintenanceLock.RUnlock()
 
 	return ig.getWithUpperSegmentBoundary(key, len(ig.segments)-1)
+}
+
+func (ig *SegmentGroup) getWithUpperSegmentBoundary2(key []byte, topMostSegment int, k string) ([]byte, error) {
+	// assumes "replace" strategy
+
+	// start with latest and exit as soon as something is found, thus making sure
+	// the latest takes presence
+	for i := topMostSegment; i >= 0; i-- {
+		v, err := ig.segments[i].get(key)
+		if err != nil {
+			if err == NotFound {
+				continue
+			}
+
+			if err == Deleted {
+				fmt.Printf("   ==> disk [%v/%v] - [%v] deleted\n", i+1, topMostSegment+1, k)
+				return nil, nil
+			}
+
+			panic(fmt.Sprintf("unsupported error in segmentGroup.get(): %v", err))
+		}
+		if v == nil {
+			fmt.Printf("   ==> disk [%v/%v] - [%v] found nil\n", i+1, topMostSegment+1, k)
+		}
+		return v, nil
+	}
+
+	fmt.Printf("   ==> disk [x/%v] - [%v] outside loop\n", topMostSegment+1, k)
+	return nil, nil
 }
 
 // not thread-safe on its own, as the assumption is that this is called from a

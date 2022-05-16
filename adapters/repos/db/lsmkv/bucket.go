@@ -101,6 +101,57 @@ func (b *Bucket) SetMemtableThreshold(size uint64) {
 	b.memTableThreshold = size
 }
 
+
+
+func (b *Bucket) Get2(key []byte, k string) ([]byte, error) {
+	b.flushLock.RLock()
+	defer b.flushLock.RUnlock()
+
+	v, err := b.active.get(key)
+	if err == nil {
+		// item found and no error, return and stop searching, since the strategy
+		// is replace
+		if v == nil {
+			fmt.Printf("   ==> active - [%v] found nil\n", k)
+		}
+		return v, nil
+	}
+	if err == Deleted {
+		// deleted in the mem-table (which is always the latest) means we don't
+		// have to check the disk segments, return nil now
+		fmt.Printf("   ==> active - [%v] deleted\n", k)
+		return nil, nil
+	}
+
+	if err != NotFound {
+		panic("unsupported error in bucket.Get")
+	}
+
+	if b.flushing != nil {
+		v, err := b.flushing.get(key)
+		if err == nil {
+			// item found and no error, return and stop searching, since the strategy
+			// is replace
+			if v == nil {
+				fmt.Printf("   ==> flushing - [%v] found nil\n", k)
+			}
+			return v, nil
+		}
+		if err == Deleted {
+			// deleted in the now most recent memtable  means we don't have to check
+			// the disk segments, return nil now
+			fmt.Printf("   ==> flushing - [%v] deleted\n", k)
+			return nil, nil
+		}
+
+		if err != NotFound {
+			panic("unsupported error in bucket.Get")
+		}
+	}
+
+	return b.disk.get2(key, k)
+}
+
 func (b *Bucket) Get(key []byte) ([]byte, error) {
 	b.flushLock.RLock()
 	defer b.flushLock.RUnlock()

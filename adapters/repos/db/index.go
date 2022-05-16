@@ -13,6 +13,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -493,6 +494,11 @@ func (i *Index) objectByID(ctx context.Context, id strfmt.UUID,
 
 	if !local {
 		remote, err := i.remote.GetObject(ctx, shardName, id, props, additional)
+		if remote == nil {
+			fmt.Printf("   ==> remote shard [%+v] [%v] [%v] not found\n", shardName, id, i.Config.ClassName.String())
+		} else {
+			fmt.Printf("   ==> remote shard [%+v] [%v] [%v] found\n", shardName, id, i.Config.ClassName.String())
+		}
 		return remote, err
 	}
 
@@ -501,7 +507,11 @@ func (i *Index) objectByID(ctx context.Context, id strfmt.UUID,
 	if err != nil {
 		return nil, errors.Wrapf(err, "shard %s", shard.ID())
 	}
-
+	if obj == nil {
+		fmt.Printf("   ==> local shard [%+v] [%v] [%v] not found \n", shardName, id, i.Config.ClassName.String())
+	} else {
+		fmt.Printf("   ==> local shard [%+v] [%v] [%v] found\n", shardName, id, i.Config.ClassName.String())
+	}
 	return obj, nil
 }
 

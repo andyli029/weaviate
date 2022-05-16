@@ -41,7 +41,7 @@ func (s *Shard) objectByID(ctx context.Context, id strfmt.UUID,
 		return nil, err
 	}
 
-	bytes, err := s.store.Bucket(helpers.ObjectsBucketLSM).Get(idBytes)
+	bytes, err := s.store.Bucket(helpers.ObjectsBucketLSM).Get2(idBytes, id.String())
 	if err != nil {
 		return nil, err
 	}

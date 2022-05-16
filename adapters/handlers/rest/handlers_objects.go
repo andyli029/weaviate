@@ -128,6 +128,7 @@ func (h *objectHandlers) getObject(params objects.ObjectsGetParams,
 
 	object, err := h.manager.GetObject(params.HTTPRequest.Context(), principal, params.ID, additional)
 	if err != nil {
+		fmt.Printf("   ==> err [%+v]\n", err)
 		switch err.(type) {
 		case errors.Forbidden:
 			return objects.NewObjectsGetForbidden().
