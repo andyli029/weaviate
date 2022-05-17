@@ -67,6 +67,7 @@ func (pv *propValuePair) fetchDocIDs(s *Searcher, limit int,
 			return err
 		}
 
+		fmt.Printf("||||-------->>>pointers: %v\n", pointers)
 		pv.docIDs = pointers
 	} else {
 		for i, child := range pv.children {

@@ -101,8 +101,6 @@ func (b *Bucket) SetMemtableThreshold(size uint64) {
 	b.memTableThreshold = size
 }
 
-
-
 func (b *Bucket) Get2(key []byte, k string) ([]byte, error) {
 	b.flushLock.RLock()
 	defer b.flushLock.RUnlock()
@@ -160,11 +158,13 @@ func (b *Bucket) Get(key []byte) ([]byte, error) {
 	if err == nil {
 		// item found and no error, return and stop searching, since the strategy
 		// is replace
+		fmt.Printf("1---->>>key: %v\n", key)
 		return v, nil
 	}
 	if err == Deleted {
 		// deleted in the mem-table (which is always the latest) means we don't
 		// have to check the disk segments, return nil now
+		fmt.Printf("2 (deleted)---->>>key: %v\n", key)
 		return nil, nil
 	}
 
@@ -177,11 +177,13 @@ func (b *Bucket) Get(key []byte) ([]byte, error) {
 		if err == nil {
 			// item found and no error, return and stop searching, since the strategy
 			// is replace
+			fmt.Printf("3---->>>key: %v\n", key)
 			return v, nil
 		}
 		if err == Deleted {
 			// deleted in the now most recent memtable  means we don't have to check
 			// the disk segments, return nil now
+			fmt.Printf("4 deleted---->>>key: %v\n", key)
 			return nil, nil
 		}
 
@@ -190,6 +192,7 @@ func (b *Bucket) Get(key []byte) ([]byte, error) {
 		}
 	}
 
+	fmt.Printf("5 disk.get---->>>key: %v\n", key)
 	return b.disk.get(key)
 }
 
@@ -247,6 +250,7 @@ func (b *Bucket) SetList(key []byte) ([][]byte, error) {
 		}
 	}
 	out = v
+	fmt.Printf("this is really this disk.getCollection???? key: %v v: %v\n", key, v)
 
 	if b.flushing != nil {
 		v, err = b.flushing.getCollection(key)
@@ -256,7 +260,7 @@ func (b *Bucket) SetList(key []byte) ([][]byte, error) {
 			}
 		}
 		out = append(out, v...)
-
+		fmt.Printf("this is really this flushing.getCollection???? key: %v v: %v\n", key, v)
 	}
 
 	v, err = b.active.getCollection(key)
@@ -267,6 +271,7 @@ func (b *Bucket) SetList(key []byte) ([][]byte, error) {
 	}
 	if len(v) > 0 {
 		// skip the expensive append operation if there was no memtable
+		fmt.Printf("this is really this active.getCollection???? key: %v v: %v\n", key, v)
 		out = append(out, v...)
 	}
 

@@ -15,6 +15,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"fmt"
 	"hash/crc64"
 
 	"github.com/pkg/errors"
@@ -33,6 +34,7 @@ func (fs *Searcher) docPointers(prop string, b *lsmkv.Bucket, limit int,
 	} else {
 		// all other operators perform operations on the inverted index which we
 		// can serve directly
+		fmt.Printf("docPointers.docPointersInverted prop: %v\n", prop)
 		return fs.docPointersInverted(prop, b, limit, pv, tolerateDuplicates)
 	}
 }
@@ -40,9 +42,11 @@ func (fs *Searcher) docPointers(prop string, b *lsmkv.Bucket, limit int,
 func (fs *Searcher) docPointersInverted(prop string, b *lsmkv.Bucket, limit int,
 	pv *propValuePair, tolerateDuplicates bool) (docPointers, error) {
 	if pv.hasFrequency {
+		fmt.Printf("---docPointersInvertedFrequency prop:%v\n", prop)
 		return fs.docPointersInvertedFrequency(prop, b, limit, pv, tolerateDuplicates)
 	}
 
+	fmt.Printf("---docPointersInvertedNoFrequency prop:%v\n", prop)
 	return fs.docPointersInvertedNoFrequency(prop, b, limit, pv, tolerateDuplicates)
 }
 

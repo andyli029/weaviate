@@ -12,6 +12,7 @@
 package lsmkv
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -188,6 +189,7 @@ func (l *Memtable) getCollection(key []byte) ([]value, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("[Memtable] getCollection here is the value: %v\n", v)
 
 	return v, nil
 }

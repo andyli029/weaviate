@@ -80,10 +80,12 @@ func (f *Searcher) Object(ctx context.Context, limit int,
 
 	// we assume that when retrieving objects, we can not tolerate duplicates as
 	// they would have a direct impact on the user
+	fmt.Printf("before fetchDocIDs\n")
 	if err := pv.fetchDocIDs(f, limit, false); err != nil {
 		return nil, errors.Wrap(err, "fetch doc ids for prop/value pair")
 	}
 
+	fmt.Printf("before mergeDocIDs\n")
 	pointers, err := pv.mergeDocIDs(false)
 	if err != nil {
 		return nil, errors.Wrap(err, "merge doc ids by operator")

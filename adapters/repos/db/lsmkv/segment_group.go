@@ -173,7 +173,7 @@ func (ig *SegmentGroup) getWithUpperSegmentBoundary2(key []byte, topMostSegment 
 			}
 
 			if err == Deleted {
-				fmt.Printf("   ==> disk [%v/%v] - [%v] deleted\n", i+1, topMostSegment+1, k)
+				fmt.Printf("   ==> disk [%v/%v level: %v] - [%v] deleted\n", i+1, topMostSegment+1, ig.segments[i].level, k)
 				return nil, nil
 			}
 
@@ -204,12 +204,14 @@ func (ig *SegmentGroup) getWithUpperSegmentBoundary(key []byte, topMostSegment i
 			}
 
 			if err == Deleted {
+				fmt.Printf("getWithUpperSegmentBoundary (deleted): key: %v\n", key)
 				return nil, nil
 			}
 
 			panic(fmt.Sprintf("unsupported error in segmentGroup.get(): %v", err))
 		}
 
+		fmt.Printf("getWithUpperSegmentBoundary (deleted): key: %v segment: %v\n", key, i)
 		return v, nil
 	}
 
@@ -261,6 +263,7 @@ func (ig *SegmentGroup) getCollection(key []byte) ([]value, error) {
 			return nil, err
 		}
 
+		fmt.Printf("+++++getCollection v is being added from segment.level: %v\n", segment.level)
 		if len(out) == 0 {
 			out = v
 		} else {

@@ -233,29 +233,31 @@ func (ig *SegmentGroup) initCompactionCycle(interval time.Duration) {
 		return
 	}
 
-	go func() {
-		t := time.Tick(interval)
-		for {
-			select {
-			case <-ig.stopCompactionCycle:
-				ig.logger.WithField("action", "lsm_compaction_stop_cycle").
-					WithField("path", ig.dir).
-					Debug("stop compaction cycle")
-				return
-			case <-t:
-				if ig.eligbleForCompaction() {
-					if err := ig.compactOnce(); err != nil {
-						ig.logger.WithField("action", "lsm_compaction").
-							WithField("path", ig.dir).
-							WithError(err).
-							Errorf("compaction failed")
-					}
-				} else {
-					ig.logger.WithField("action", "lsm_compaction").
-						WithField("path", ig.dir).
-						Trace("no segment eligble for compaction")
-				}
-			}
-		}
-	}()
+	fmt.Printf("+++++ NO COMPACTION!!!!!!!!!!!!\n")
+
+	// go func() {
+	// 	t := time.Tick(interval)
+	// 	for {
+	// 		select {
+	// 		case <-ig.stopCompactionCycle:
+	// 			ig.logger.WithField("action", "lsm_compaction_stop_cycle").
+	// 				WithField("path", ig.dir).
+	// 				Debug("stop compaction cycle")
+	// 			return
+	// 		case <-t:
+	// 			if ig.eligbleForCompaction() {
+	// 				if err := ig.compactOnce(); err != nil {
+	// 					ig.logger.WithField("action", "lsm_compaction").
+	// 						WithField("path", ig.dir).
+	// 						WithError(err).
+	// 						Errorf("compaction failed")
+	// 				}
+	// 			} else {
+	// 				ig.logger.WithField("action", "lsm_compaction").
+	// 					WithField("path", ig.dir).
+	// 					Trace("no segment eligble for compaction")
+	// 			}
+	// 		}
+	// 	}
+	// }()
 }
